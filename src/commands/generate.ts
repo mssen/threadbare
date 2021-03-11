@@ -10,7 +10,7 @@ module.exports = {
       print: { info },
     } = toolbox;
 
-    const name = parameters.first;
+    const name = parameters.first || '';
 
     await generate({
       template: 'model.ts.ejs',

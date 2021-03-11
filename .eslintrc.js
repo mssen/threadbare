@@ -16,5 +16,5 @@ module.exports = {
   env: {
     node: true,
   },
-  ignorePatterns: ['commitlint.config.js'],
+  ignorePatterns: ['commitlint.config.js', 'build'],
 };
