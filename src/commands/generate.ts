@@ -1,6 +1,6 @@
-import { GluegunToolbox } from 'gluegun';
+import type { GluegunCommand, GluegunToolbox } from 'gluegun';
 
-module.exports = {
+const command: GluegunCommand = {
   name: 'generate',
   alias: ['g'],
   run: async (toolbox: GluegunToolbox) => {
@@ -21,3 +21,5 @@ module.exports = {
     info(`Generated file at models/${name}-model.ts`);
   },
 };
+
+export default command;

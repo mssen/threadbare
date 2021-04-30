@@ -1,8 +1,8 @@
-import { GluegunToolbox } from 'gluegun';
+import type { GluegunToolbox } from 'gluegun';
 
 // add your CLI-specific functionality here, which will then be accessible
 // to your commands
-module.exports = (toolbox: GluegunToolbox) => {
+const extension = (toolbox: GluegunToolbox): void => {
   toolbox.foo = () => {
     toolbox.print.info('called foo extension');
   };
@@ -15,3 +15,5 @@ module.exports = (toolbox: GluegunToolbox) => {
   //   ...toolbox.config.loadConfig("threadbare", process.cwd())
   // }
 };
+
+export default extension;
