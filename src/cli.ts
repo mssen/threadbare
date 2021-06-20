@@ -14,7 +14,6 @@ async function run(argv: string[]): Promise<GluegunToolbox> {
       'strings',
       'semver',
       'system',
-      'http',
       'patching',
       'package-manager',
     ])
