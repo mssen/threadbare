@@ -1,4 +1,4 @@
-import { GluegunCommand } from 'gluegun';
+import type { GluegunCommand } from 'gluegun';
 
 const command: GluegunCommand = {
   name: 'threadbare',
