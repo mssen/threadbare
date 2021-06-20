@@ -6,7 +6,8 @@ const command: GluegunCommand = {
   alias: ['s'],
   description: 'Scrapes a twitter thread and saves it to a JSON file',
   run: async (toolbox: GluegunToolbox) => {
-    const { parameters, print, prompt, twitter } = toolbox;
+    const { parameters, print, prompt, twitter: twitterUntyped } = toolbox;
+    const twitter = twitterUntyped as Twitter;
 
     let id = parameters.first;
 
@@ -14,7 +15,7 @@ const command: GluegunCommand = {
       const result = await prompt.ask({
         type: 'input',
         name: 'id',
-        message: 'Tweet ID>',
+        message: 'Tweet ID',
       });
       id = result?.id;
     }
@@ -26,7 +27,23 @@ const command: GluegunCommand = {
       return;
     }
 
-    const tweet = await (twitter as Twitter).getTweet(id);
+    if (!(await twitter.hasApiToken())) {
+      const result = await prompt.ask({
+        type: 'input',
+        name: 'token',
+        // TODO: a better help message that specified this is the bearer token
+        message: 'Twitter Token',
+      });
+
+      if (result?.token) {
+        await twitter.saveApiToken(result.token);
+      } else {
+        print.error('Must input API token.');
+        return;
+      }
+    }
+
+    const tweet = await twitter.getTweet(id);
     print.debug(tweet);
   },
 };

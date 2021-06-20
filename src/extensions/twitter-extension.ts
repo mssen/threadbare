@@ -33,27 +33,53 @@ interface Error {
   errors: Array<{ code?: string; message: string }>;
 }
 
+type Token = string | undefined;
+type ReadApiToken = () => Promise<Token>;
+type GetApiToken = () => Promise<Token>;
+type HasApiToken = () => Promise<boolean>;
+type SaveApiToken = (token: string) => Promise<void>;
 type GetTweet = (id: string) => Promise<Tweet | Error | undefined>;
 
 export interface Twitter {
+  hasApiToken: HasApiToken;
+  saveApiToken: SaveApiToken;
   getTweet: GetTweet;
 }
 
 const extension = (toolbox: GluegunToolbox): void => {
-  const { prompt, http } = toolbox;
+  const { http, filesystem } = toolbox;
+
+  // --- TOKEN
+  const TWITTER_CONFIG = `${filesystem.homedir()}/.threadbare`;
+
+  let token: Token;
+
+  const readApiToken: ReadApiToken = async () =>
+    (filesystem.exists(TWITTER_CONFIG) &&
+      filesystem.readAsync(TWITTER_CONFIG)) ||
+    undefined;
+
+  const getApiToken: GetApiToken = async () => {
+    if (token) return token;
+    token = await readApiToken();
+    return token;
+  };
+
+  const hasApiToken: HasApiToken = async () => Boolean(await getApiToken());
+
+  const saveApiToken: SaveApiToken = (token) =>
+    filesystem.writeAsync(TWITTER_CONFIG, token);
+
+  // --- API
   const api = http.create({
     baseURL: 'https://api.twitter.com/2/tweets',
   });
 
   const getTweet: GetTweet = async (id) => {
-    const { key } = await prompt.ask({
-      type: 'input',
-      name: 'key',
-      message: 'API Key>',
-    });
+    const token = await getApiToken();
 
-    if (key) {
-      api.setHeader('Authorization', `Bearer ${key}`);
+    if (token) {
+      api.setHeader('Authorization', `Bearer ${token}`);
       const { data } = await api.get<Tweet | Error>(`/${id}`, {
         expansions: 'attachments.media_keys,referenced_tweets.id',
         'media.fields': 'url',
@@ -62,10 +88,14 @@ const extension = (toolbox: GluegunToolbox): void => {
       return data;
     }
 
-    print.error('Must input API key.');
+    print.error('No API token found.');
   };
 
-  toolbox.twitter = { getTweet };
+  toolbox.twitter = {
+    hasApiToken,
+    saveApiToken,
+    getTweet,
+  };
 };
 
 export default extension;
