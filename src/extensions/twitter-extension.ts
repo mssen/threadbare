@@ -39,11 +39,13 @@ type GetApiToken = () => Promise<Token>;
 type HasApiToken = () => Promise<boolean>;
 type SaveApiToken = (token: string) => Promise<void>;
 type GetTweet = (id: string) => Promise<Tweet | Error | undefined>;
+type IsTwitterError = (response: Tweet | Error) => response is Error;
 
 export interface Twitter {
   hasApiToken: HasApiToken;
   saveApiToken: SaveApiToken;
   getTweet: GetTweet;
+  isTwitterError: IsTwitterError;
 }
 
 const extension = (toolbox: GluegunToolbox): void => {
@@ -91,10 +93,14 @@ const extension = (toolbox: GluegunToolbox): void => {
     print.error('No API token found.');
   };
 
+  const isTwitterError = (response: Tweet | Error): response is Error =>
+    (response as Error).errors !== undefined;
+
   toolbox.twitter = {
     hasApiToken,
     saveApiToken,
     getTweet,
+    isTwitterError,
   };
 };
 

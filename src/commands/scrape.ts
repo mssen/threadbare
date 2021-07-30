@@ -31,7 +31,7 @@ const command: GluegunCommand = {
       const result = await prompt.ask({
         type: 'input',
         name: 'token',
-        // TODO: a better help message that specified this is the bearer token
+        // TODO: a better help message that specifies this is the bearer token
         message: 'Twitter Token',
       });
 
@@ -44,7 +44,18 @@ const command: GluegunCommand = {
     }
 
     const tweet = await twitter.getTweet(id);
-    print.debug(tweet);
+
+    if (!tweet) {
+      print.error('Unexpected error.');
+      return;
+    }
+
+    if (twitter.isTwitterError(tweet)) {
+      print.error(`Error occurred.\n${tweet.errors.join('\n')}`);
+      return;
+    }
+
+    print.debug(JSON.stringify(tweet, null, 2));
   },
 };
 
