@@ -5,7 +5,7 @@ interface TweetReference {
   id: string;
 }
 
-interface Media {
+export interface Media {
   media_key: string;
   type: 'animated_gif' | 'photo' | 'video';
   url: string;
@@ -34,8 +34,6 @@ interface Error {
 }
 
 type Token = string | undefined;
-type ReadApiToken = () => Promise<Token>;
-type GetApiToken = () => Promise<Token>;
 type HasApiToken = () => Promise<boolean>;
 type SaveApiToken = (token: string) => Promise<void>;
 type GetTweet = (id: string) => Promise<Tweet | Error | undefined>;
@@ -56,12 +54,12 @@ const extension = (toolbox: GluegunToolbox): void => {
 
   let token: Token;
 
-  const readApiToken: ReadApiToken = async () =>
+  const readApiToken = async (): Promise<Token> =>
     (filesystem.exists(TWITTER_CONFIG) &&
       filesystem.readAsync(TWITTER_CONFIG)) ||
     undefined;
 
-  const getApiToken: GetApiToken = async () => {
+  const getApiToken = async (): Promise<Token> => {
     if (token) return token;
     token = await readApiToken();
     return token;

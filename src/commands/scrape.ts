@@ -1,12 +1,24 @@
 import type { GluegunCommand, GluegunToolbox } from 'gluegun';
-import { Twitter } from '../extensions/twitter-extension';
+import { Twitter, Media } from '../extensions/twitter-extension';
+
+interface TweetEntry {
+  id: string;
+  text: string;
+  media?: Pick<Media, 'type' | 'url'>[];
+}
 
 const command: GluegunCommand = {
   name: 'scrape',
   alias: ['s'],
   description: 'Scrapes a twitter thread and saves it to a JSON file',
   run: async (toolbox: GluegunToolbox) => {
-    const { parameters, print, prompt, twitter: twitterUntyped } = toolbox;
+    const {
+      filesystem,
+      parameters,
+      print,
+      prompt,
+      twitter: twitterUntyped,
+    } = toolbox;
     const twitter = twitterUntyped as Twitter;
 
     let id = parameters.first;
@@ -22,7 +34,7 @@ const command: GluegunCommand = {
 
     if (!/^[0-9]{1,19}$/.test(id)) {
       print.error(
-        'Tweet ID must be a numerical ID between 1 and 19 characters'
+        'Tweet ID must be a numerical ID between 1 and 19 characters.'
       );
       return;
     }
@@ -43,19 +55,48 @@ const command: GluegunCommand = {
       }
     }
 
-    const tweet = await twitter.getTweet(id);
+    const data: TweetEntry[] = [];
 
-    if (!tweet) {
-      print.error('Unexpected error.');
-      return;
-    }
+    const fetchAndParse = async (tweetId: string): Promise<void> => {
+      const tweet = await twitter.getTweet(tweetId);
 
-    if (twitter.isTwitterError(tweet)) {
-      print.error(`Error occurred.\n${tweet.errors.join('\n')}`);
-      return;
-    }
+      if (!tweet) {
+        print.error('Unexpected error.');
+        return;
+      }
 
-    print.debug(JSON.stringify(tweet, null, 2));
+      if (twitter.isTwitterError(tweet)) {
+        print.error(`Error occurred.\n${tweet.errors.join('\n')}`);
+        return;
+      }
+
+      data.unshift({
+        id: tweet.data.id,
+        text: tweet.data.text,
+        ...(tweet.includes?.media
+          ? {
+              media: tweet.includes.media.map(({ type, url }) => ({
+                type,
+                url,
+              })),
+            }
+          : {}),
+      });
+
+      if (tweet.data.referenced_tweets) {
+        const [repliedToTweet] = tweet.data.referenced_tweets.filter(
+          (tweet) => tweet.type === 'replied_to'
+        );
+
+        if (repliedToTweet) {
+          await fetchAndParse(repliedToTweet.id);
+        }
+      }
+    };
+
+    await fetchAndParse(id);
+
+    filesystem.write(`${id}.json`, data);
   },
 };
 
