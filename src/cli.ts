@@ -1,4 +1,5 @@
-import { build, GluegunToolbox } from 'gluegun';
+import { build } from 'gluegun';
+import type { GluegunToolbox } from 'gluegun';
 
 /**
  * Create the cli and kick it off
@@ -9,14 +10,7 @@ async function run(argv: string[]): Promise<GluegunToolbox> {
     .src(__dirname)
     .help()
     .version()
-    .exclude([
-      'meta',
-      'strings',
-      'semver',
-      'system',
-      'patching',
-      'package-manager',
-    ])
+    .exclude(['strings', 'semver', 'system', 'patching', 'package-manager'])
     .create();
 
   const toolbox = await cli.run(argv);
