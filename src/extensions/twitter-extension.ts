@@ -1,4 +1,4 @@
-import { GluegunToolbox, print } from 'gluegun';
+import { type GluegunToolbox, print } from 'gluegun';
 
 interface TweetReference {
   type: string;

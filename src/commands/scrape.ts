@@ -1,5 +1,5 @@
 import type { GluegunCommand, GluegunToolbox } from 'gluegun';
-import { Twitter, Media } from '../extensions/twitter-extension';
+import type { Twitter, Media } from '../extensions/twitter-extension';
 
 interface TweetEntry {
   id: string;
