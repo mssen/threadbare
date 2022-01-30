@@ -73,13 +73,11 @@ const command: GluegunCommand = {
       const tweet = await twitter.getTweet(tweetId);
 
       if (!tweet) {
-        print.error('Unexpected error.');
-        return;
+        throw new Error('Unexpected error.');
       }
 
       if (twitter.isTwitterError(tweet)) {
-        print.error(`Error occurred.\n${tweet.errors.join('\n')}`);
-        return;
+        throw new Error(`Error occurred.\n${tweet.errors.join('\n')}`);
       }
 
       data.unshift({
@@ -118,7 +116,13 @@ const command: GluegunCommand = {
       }
     };
 
-    await fetchAndParse(id);
+    const spinner = print.spin('Fetching tweet thread');
+    try {
+      await fetchAndParse(id);
+      spinner.succeed(`Saved to ${id}.json`);
+    } catch (error) {
+      spinner.fail((error as Error).message);
+    }
 
     filesystem.write(`${id}.json`, data);
   },
