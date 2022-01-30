@@ -11,7 +11,7 @@ export interface Media {
   url: string;
 }
 
-interface UrlEntity {
+export interface UrlEntity {
   start: number;
   end: number;
   url: string;
@@ -20,13 +20,13 @@ interface UrlEntity {
   unwound_url?: string;
 }
 
-interface HashtagEntity {
+export interface HashtagEntity {
   start: number;
   end: number;
   tag: string;
 }
 
-interface MentionEntity {
+export interface MentionEntity {
   start: number;
   end: number;
   username: string;
