@@ -1,10 +1,22 @@
+import pick from 'lodash/fp/pick';
 import type { GluegunCommand, GluegunToolbox } from 'gluegun';
-import { Twitter, Media } from '../extensions/twitter-extension';
+import type {
+  Twitter,
+  Media,
+  UrlEntity,
+  MentionEntity,
+  HashtagEntity,
+} from '../extensions/twitter-extension';
 
 interface TweetEntry {
   id: string;
   text: string;
   media?: Pick<Media, 'type' | 'url'>[];
+  entities?: {
+    urls?: Omit<UrlEntity, 'url'>[];
+    hashtags?: HashtagEntity[];
+    mentions?: MentionEntity[];
+  };
 }
 
 const command: GluegunCommand = {
@@ -75,10 +87,22 @@ const command: GluegunCommand = {
         text: tweet.data.text,
         ...(tweet.includes?.media
           ? {
-              media: tweet.includes.media.map(({ type, url }) => ({
-                type,
-                url,
-              })),
+              media: tweet.includes.media.map(pick(['type', 'url'])),
+            }
+          : {}),
+        ...(tweet.data.entities
+          ? {
+              entities: {
+                urls: tweet.data.entities.urls?.map(
+                  pick(['start', 'end', 'expanded_url', 'display_url'])
+                ),
+                hashtags: tweet.data.entities.hashtags?.map(
+                  pick(['start', 'end', 'tag'])
+                ),
+                mentions: tweet.data.entities.mentions?.map(
+                  pick(['start', 'end', 'username'])
+                ),
+              },
             }
           : {}),
       });
