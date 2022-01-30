@@ -11,6 +11,27 @@ export interface Media {
   url: string;
 }
 
+interface UrlEntity {
+  start: number;
+  end: number;
+  url: string;
+  expanded_url: string;
+  display_url: string;
+  unwound_url?: string;
+}
+
+interface HashtagEntity {
+  start: number;
+  end: number;
+  tag: string;
+}
+
+interface MentionEntity {
+  start: number;
+  end: number;
+  username: string;
+}
+
 interface BaseTweet {
   data: {
     id: string;
@@ -19,6 +40,11 @@ interface BaseTweet {
       media_keys: string[];
     };
     referenced_tweets?: TweetReference[];
+    entities?: {
+      urls?: UrlEntity[];
+      hashtags?: HashtagEntity[];
+      mentions?: MentionEntity[];
+    };
   };
 }
 
@@ -83,6 +109,7 @@ const extension = (toolbox: GluegunToolbox): void => {
       const { data } = await api.get<Tweet | Error>(`/${id}`, {
         expansions: 'attachments.media_keys,referenced_tweets.id',
         'media.fields': 'url',
+        'tweet.fields': 'entities',
       });
 
       return data;
