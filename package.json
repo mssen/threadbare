@@ -33,7 +33,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "gluegun": "5.0.0",
+    "gluegun": "5.1.0",
     "lodash": "4.17.21"
   },
   "devDependencies": {
