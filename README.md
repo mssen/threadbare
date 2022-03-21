@@ -1,6 +1,6 @@
-# threadbare CLI
+# Threadbare CLI
 
-A CLI for threadbare.
+A CLI for Threadbare.
 
 ## Customizing your CLI
 
