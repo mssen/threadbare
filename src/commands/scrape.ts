@@ -106,7 +106,7 @@ const command: GluegunCommand = {
       });
 
       if (tweet.data.referenced_tweets) {
-        const [repliedToTweet] = tweet.data.referenced_tweets.filter(
+        const repliedToTweet = tweet.data.referenced_tweets.find(
           (tweet) => tweet.type === 'replied_to'
         );
 
