@@ -1,22 +1,37 @@
-# threadbare CLI
+# 🪡 threadbare
 
-A CLI for threadbare.
+A Twitter thread scraper CLI that works from the bottom up. 👆
 
-## Customizing your CLI
+## Commands
 
-Check out the documentation at https://github.com/infinitered/gluegun/tree/master/docs.
+### Authentication
 
-## Publishing to NPM
+TODO: token process with links to Twitter docs
 
-To package your CLI up for NPM, do this:
+### `scrape`
 
-```shell
-$ npm login
-$ npm whoami
-$ npm lint
-$ npm test
-(if typescript, run `npm run build` here)
-$ npm publish
+Scrapes thread and saves it to a JSON file. Must be given the ID for the last tweet in the thread.
+
+**Name:** `scrape`
+
+**Alias:** `s`
+
+**Options:**
+
+- `--name` (`-n`): filename for JSON file
+
+**Examples**
+
+Will write to `1475991326554472448.json`.
+
+```bash
+threadbare scrape 1475991326554472448
+```
+
+Will write to `2021Recap.json`.
+
+```bash
+ threadbare scrape 1475991326554472448 --name 2021Recap
 ```
 
 # License
