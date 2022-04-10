@@ -127,14 +127,10 @@ const command: GluegunCommand = {
       spinner.fail((error as Error).message);
     }
 
-    print.debug(parameters.options);
-
     const filename =
       (parameters.options['name'] as string) ||
       (parameters.options['n'] as string) ||
       id;
-
-    print.debug(filename);
 
     filesystem.write(`${filename}.json`, data);
   },
