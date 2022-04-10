@@ -23,6 +23,8 @@ const command: GluegunCommand = {
   name: 'scrape',
   alias: ['s'],
   description: 'Scrapes a twitter thread and saves it to a JSON file',
+  // run is improperly typed
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   run: async (toolbox: GluegunToolbox) => {
     const {
       filesystem,

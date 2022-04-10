@@ -3,6 +3,8 @@ import type { GluegunCommand, GluegunToolbox } from 'gluegun';
 const command: GluegunCommand = {
   name: 'generate',
   alias: ['g'],
+  // run is improperly typed
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   run: async (toolbox: GluegunToolbox) => {
     const {
       parameters,
