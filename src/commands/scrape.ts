@@ -22,7 +22,8 @@ interface TweetEntry {
 const command: GluegunCommand = {
   name: 'scrape',
   alias: ['s'],
-  description: 'Scrapes a twitter thread and saves it to a JSON file',
+  description:
+    'Scrapes a twitter thread and saves it to a JSON file. Use --name (-n) to specify a filename.',
   // run is improperly typed
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   run: async (toolbox: GluegunToolbox) => {
@@ -126,7 +127,16 @@ const command: GluegunCommand = {
       spinner.fail((error as Error).message);
     }
 
-    filesystem.write(`${id}.json`, data);
+    print.debug(parameters.options);
+
+    const filename =
+      (parameters.options['name'] as string) ||
+      (parameters.options['n'] as string) ||
+      id;
+
+    print.debug(filename);
+
+    filesystem.write(`${filename}.json`, data);
   },
 };
 
