@@ -1,4 +1,6 @@
+import isEqual from 'lodash/fp/isEqual';
 import pick from 'lodash/fp/pick';
+import uniqWith from 'lodash/fp/uniqWith';
 import type { GluegunCommand, GluegunToolbox } from 'gluegun';
 import type {
   Twitter,
@@ -8,7 +10,7 @@ import type {
   HashtagEntity,
 } from '../extensions/twitter-extension';
 
-interface TweetEntry {
+export interface TweetEntry {
   id: string;
   text: string;
   media?: Pick<Media, 'type' | 'url'>[];
@@ -18,6 +20,8 @@ interface TweetEntry {
     mentions?: MentionEntity[];
   };
 }
+
+const removeDuplicates = uniqWith(isEqual);
 
 const command: GluegunCommand = {
   name: 'scrape',
@@ -58,8 +62,7 @@ const command: GluegunCommand = {
       const result = await prompt.ask({
         type: 'input',
         name: 'token',
-        // TODO: a better help message that specifies this is the bearer token
-        message: 'Twitter Token',
+        message: 'Twitter Bearer Token',
       });
 
       if (result?.token) {
@@ -70,6 +73,10 @@ const command: GluegunCommand = {
       }
     }
 
+    const filename =
+      (parameters.options['name'] as string) ||
+      (parameters.options['n'] as string) ||
+      id;
     const data: TweetEntry[] = [];
 
     const fetchAndParse = async (tweetId: string): Promise<void> => {
@@ -94,14 +101,20 @@ const command: GluegunCommand = {
         ...(tweet.data.entities
           ? {
               entities: {
-                urls: tweet.data.entities.urls?.map(
-                  pick(['start', 'end', 'expanded_url', 'display_url'])
+                urls: removeDuplicates(
+                  tweet.data.entities.urls?.map(
+                    pick(['start', 'end', 'expanded_url', 'display_url'])
+                  )
                 ),
-                hashtags: tweet.data.entities.hashtags?.map(
-                  pick(['start', 'end', 'tag'])
+                hashtags: removeDuplicates(
+                  tweet.data.entities.hashtags?.map(
+                    pick(['start', 'end', 'tag'])
+                  )
                 ),
-                mentions: tweet.data.entities.mentions?.map(
-                  pick(['start', 'end', 'username'])
+                mentions: removeDuplicates(
+                  tweet.data.entities.mentions?.map(
+                    pick(['start', 'end', 'username'])
+                  )
                 ),
               },
             }
@@ -122,15 +135,10 @@ const command: GluegunCommand = {
     const spinner = print.spin('Fetching tweet thread');
     try {
       await fetchAndParse(id);
-      spinner.succeed(`Saved to ${id}.json`);
+      spinner.succeed(`Saved to ${filename}.json`);
     } catch (error) {
       spinner.fail((error as Error).message);
     }
-
-    const filename =
-      (parameters.options['name'] as string) ||
-      (parameters.options['n'] as string) ||
-      id;
 
     filesystem.write(`${filename}.json`, data);
   },
