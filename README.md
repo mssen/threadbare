@@ -10,7 +10,7 @@ TODO: token process with links to Twitter docs
 
 ### `scrape`
 
-Scrapes thread and saves it to a JSON file. Must be given the ID for the last tweet in the thread.
+Scrapes thread and saves it to a JSON file. **Must be given the ID for the last tweet in the thread.**
 
 **Name:** `scrape`
 
@@ -36,6 +36,28 @@ Will write to `2021Recap.json`.
  threadbare scrape 1475991326554472448 --name 2021Recap
  # or
  threadbare scrape 1475991326554472448 -n 2021Recap
+```
+
+### `generate`
+
+Generates a view from a given scrapped JSON file.
+
+**Name:** `generate`
+
+**Alias:** `g`
+
+**Options:**
+
+- `--lang` (`-l`): the [`lang`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/lang) attribute for HTML, defaults to `en`
+
+**Examples**
+
+Will generate a view from `2021Recap.json`.
+
+```bash
+ threadbare generate 2021Recap.json
+ # or
+ threadbare g 2021Recap.json
 ```
 
 # License
