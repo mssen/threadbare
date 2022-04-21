@@ -1,4 +1,5 @@
 import sortBy from 'lodash/fp/sortBy';
+import path from 'path';
 import type { GluegunCommand, GluegunToolbox } from 'gluegun';
 import type { TweetEntry } from './scrape';
 
@@ -66,28 +67,39 @@ const command: GluegunCommand = {
       print,
     } = toolbox;
 
-    // TODO: more options, like specifying language
-    const filename = parameters.first || '';
-    // TODO: account for path
-    const tweetName = filename.substring(0, filename.length - 5);
+    const filepath = parameters.first || '';
+    const lang =
+      (parameters.options['lang'] as string) ||
+      (parameters.options['l'] as string) ||
+      'en';
 
-    const threadJson = filesystem.read(filename);
+    const tweetName = path.basename(filepath, '.json');
+
+    const threadJson = filesystem.read(filepath);
     if (!threadJson) {
-      print.error(`Did not find JSON file at ${filename}.`);
+      print.error(`Did not find JSON file at ${filepath}.`);
       return;
     }
 
     // TODO: type guard with error if it's malformed
     const thread = JSON.parse(threadJson) as TweetEntry[];
-    thread.forEach(parseText);
 
-    await generate({
-      template: 'one-page.ejs',
-      target: `${tweetName}/index.html`,
-      props: { thread },
-    });
+    const spinner = print.spin('Generating view');
 
-    print.info(`Generated file at ${tweetName}/index.html`);
+    try {
+      thread.forEach(parseText);
+
+      await generate({
+        template: 'scroll.ejs',
+        target: `${tweetName}/index.html`,
+        props: { thread, lang },
+      });
+
+      spinner.succeed(`Generated file at ${tweetName}/index.html`);
+    } catch (error) {
+      spinner.fail('Something went wrong.');
+      throw error;
+    }
   },
 };
 
