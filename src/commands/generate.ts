@@ -48,8 +48,8 @@ export function parseText(tweet: TweetEntry) {
     return text + tweet.text.substring(start, end) + part.text + endText;
   }, '');
 
-  tweet.text = `<p>${parsedText.replace('\n\n', '</p><p>')}</p>`.replace(
-    '\n',
+  tweet.text = `<p>${parsedText.replace(/\n\n/g, '</p><p>')}</p>`.replace(
+    /\n/g,
     '<br>'
   );
 }
