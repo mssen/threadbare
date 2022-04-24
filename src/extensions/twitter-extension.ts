@@ -1,4 +1,4 @@
-import { type GluegunToolbox, print } from 'gluegun';
+import type { GluegunToolbox } from 'gluegun';
 
 interface TweetReference {
   type: string;
@@ -73,7 +73,7 @@ export interface Twitter {
 }
 
 const extension = (toolbox: GluegunToolbox): void => {
-  const { http, filesystem } = toolbox;
+  const { http, filesystem, print } = toolbox;
 
   // --- TOKEN
   const TWITTER_CONFIG = `${filesystem.homedir()}/.threadbare`;
