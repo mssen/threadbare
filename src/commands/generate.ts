@@ -1,9 +1,9 @@
 import sortBy from 'lodash/fp/sortBy';
 import path from 'path';
 import type { GluegunCommand, GluegunToolbox } from 'gluegun';
-import type { TweetEntry } from './scrape';
+import type { ParsedThread, Validate } from '../extensions/validate-extension';
 
-export function parseText(tweet: TweetEntry) {
+export function parseText(tweet: ParsedThread[number]) {
   const urlParts =
     tweet.entities?.urls?.map(({ start, end, expanded_url, display_url }) => {
       return {
@@ -65,7 +65,10 @@ const command: GluegunCommand = {
       filesystem,
       template: { generate },
       print,
+      validate: untypedValidate,
     } = toolbox;
+
+    const validate = untypedValidate as Validate;
 
     const filepath = parameters.first || '';
     const lang =
@@ -81,8 +84,10 @@ const command: GluegunCommand = {
       return;
     }
 
-    // TODO: type guard with error if it's malformed
-    const thread = JSON.parse(threadJson) as TweetEntry[];
+    const thread = validate.validateAndParse(threadJson);
+    if (!thread) {
+      return;
+    }
 
     const spinner = print.spin('Generating view');
 
