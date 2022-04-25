@@ -1,8 +1,10 @@
-<html lang="<%- props.lang %>">
+<html lang="<%= props.lang %>">
   <head>
     <title>Twitter Thread</title>
   </head>
   <body>
-    <% props.thread.forEach(tweet => { %> <%- tweet.text %> <% }) %>
+    <main>
+      <% props.thread.forEach(tweet => { %> <%- tweet.text %> <% }) %>
+    </main>
   </body>
 </html>
