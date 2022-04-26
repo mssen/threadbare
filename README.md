@@ -41,7 +41,7 @@ Will write to `2021Recap.json`.
 
 ### `generate`
 
-Generates a view from a given scrapped JSON file.
+Generates a view from a given scraped JSON file.
 
 **Name:** `generate`
 
