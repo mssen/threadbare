@@ -1,0 +1,28 @@
+<html lang="<%= props.lang %>">
+  <head>
+    <title>Twitter Thread Page <%= props.pageNumber %></title>
+  </head>
+  <body>
+    <main>
+      <%- props.tweet.text %>
+    </main>
+    <footer class="pagination">
+      <% if (props.pageNumber !== 1) { %>
+       <a href="<%= props.pageNumber - 1 %>.html">Previous</a>
+      <% } %>
+      <% if (props.pageNumber !== props.totalPages) { %>
+        <a href="<%= props.pageNumber + 1 %>.html">Next</a>
+      <% } %>
+
+      <% for( let index = 1; index <= props.totalPages; index++ ) { %>
+        <a
+        <% if (index === props.pageNumber) { %>
+          aria-current="page" class="active"
+        <% } %>
+        href="<%= index %>.html">
+        <%= index %> 
+      </a>
+      <% } %>
+    </footer>
+  </body>
+</html>

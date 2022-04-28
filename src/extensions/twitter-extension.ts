@@ -1,4 +1,4 @@
-import { GluegunToolbox, print } from 'gluegun';
+import type { GluegunToolbox } from 'gluegun';
 
 interface TweetReference {
   type: string;
@@ -11,6 +11,27 @@ export interface Media {
   url: string;
 }
 
+export interface UrlEntity {
+  start: number;
+  end: number;
+  url: string;
+  expanded_url: string;
+  display_url: string;
+  unwound_url?: string;
+}
+
+export interface HashtagEntity {
+  start: number;
+  end: number;
+  tag: string;
+}
+
+export interface MentionEntity {
+  start: number;
+  end: number;
+  username: string;
+}
+
 interface BaseTweet {
   data: {
     id: string;
@@ -19,6 +40,11 @@ interface BaseTweet {
       media_keys: string[];
     };
     referenced_tweets?: TweetReference[];
+    entities?: {
+      urls?: UrlEntity[];
+      hashtags?: HashtagEntity[];
+      mentions?: MentionEntity[];
+    };
   };
 }
 
@@ -47,7 +73,7 @@ export interface Twitter {
 }
 
 const extension = (toolbox: GluegunToolbox): void => {
-  const { http, filesystem } = toolbox;
+  const { http, filesystem, print } = toolbox;
 
   // --- TOKEN
   const TWITTER_CONFIG = `${filesystem.homedir()}/.threadbare`;
@@ -83,6 +109,7 @@ const extension = (toolbox: GluegunToolbox): void => {
       const { data } = await api.get<Tweet | Error>(`/${id}`, {
         expansions: 'attachments.media_keys,referenced_tweets.id',
         'media.fields': 'url',
+        'tweet.fields': 'entities',
       });
 
       return data;

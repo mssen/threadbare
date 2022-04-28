@@ -1,16 +1,35 @@
+import isEqual from 'lodash/fp/isEqual';
+import pick from 'lodash/fp/pick';
+import uniqWith from 'lodash/fp/uniqWith';
 import type { GluegunCommand, GluegunToolbox } from 'gluegun';
-import { Twitter, Media } from '../extensions/twitter-extension';
+import type {
+  Twitter,
+  Media,
+  UrlEntity,
+  MentionEntity,
+  HashtagEntity,
+} from '../extensions/twitter-extension';
 
-interface TweetEntry {
+export interface TweetEntry {
   id: string;
   text: string;
   media?: Pick<Media, 'type' | 'url'>[];
+  entities?: {
+    urls?: Omit<UrlEntity, 'url'>[];
+    hashtags?: HashtagEntity[];
+    mentions?: MentionEntity[];
+  };
 }
+
+const removeDuplicates = uniqWith(isEqual);
 
 const command: GluegunCommand = {
   name: 'scrape',
   alias: ['s'],
-  description: 'Scrapes a twitter thread and saves it to a JSON file',
+  description:
+    'Scrapes a twitter thread and saves it to a JSON file. Use --name (-n) to specify a filename.',
+  // run is improperly typed
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   run: async (toolbox: GluegunToolbox) => {
     const {
       filesystem,
@@ -43,8 +62,7 @@ const command: GluegunCommand = {
       const result = await prompt.ask({
         type: 'input',
         name: 'token',
-        // TODO: a better help message that specifies this is the bearer token
-        message: 'Twitter Token',
+        message: 'Twitter Bearer Token',
       });
 
       if (result?.token) {
@@ -55,19 +73,21 @@ const command: GluegunCommand = {
       }
     }
 
+    const filename =
+      (parameters.options['name'] as string) ||
+      (parameters.options['n'] as string) ||
+      id;
     const data: TweetEntry[] = [];
 
     const fetchAndParse = async (tweetId: string): Promise<void> => {
       const tweet = await twitter.getTweet(tweetId);
 
       if (!tweet) {
-        print.error('Unexpected error.');
-        return;
+        throw new Error('Unexpected error.');
       }
 
       if (twitter.isTwitterError(tweet)) {
-        print.error(`Error occurred.\n${tweet.errors.join('\n')}`);
-        return;
+        throw new Error(`Error occurred.\n${tweet.errors.join('\n')}`);
       }
 
       data.unshift({
@@ -75,16 +95,34 @@ const command: GluegunCommand = {
         text: tweet.data.text,
         ...(tweet.includes?.media
           ? {
-              media: tweet.includes.media.map(({ type, url }) => ({
-                type,
-                url,
-              })),
+              media: tweet.includes.media.map(pick(['type', 'url'])),
+            }
+          : {}),
+        ...(tweet.data.entities
+          ? {
+              entities: {
+                urls: removeDuplicates(
+                  tweet.data.entities.urls?.map(
+                    pick(['start', 'end', 'expanded_url', 'display_url'])
+                  )
+                ),
+                hashtags: removeDuplicates(
+                  tweet.data.entities.hashtags?.map(
+                    pick(['start', 'end', 'tag'])
+                  )
+                ),
+                mentions: removeDuplicates(
+                  tweet.data.entities.mentions?.map(
+                    pick(['start', 'end', 'username'])
+                  )
+                ),
+              },
             }
           : {}),
       });
 
       if (tweet.data.referenced_tweets) {
-        const [repliedToTweet] = tweet.data.referenced_tweets.filter(
+        const repliedToTweet = tweet.data.referenced_tweets.find(
           (tweet) => tweet.type === 'replied_to'
         );
 
@@ -94,9 +132,15 @@ const command: GluegunCommand = {
       }
     };
 
-    await fetchAndParse(id);
+    const spinner = print.spin('Fetching tweet thread');
+    try {
+      await fetchAndParse(id);
+      spinner.succeed(`Saved to ${filename}.json`);
+    } catch (error) {
+      spinner.fail((error as Error).message);
+    }
 
-    filesystem.write(`${id}.json`, data);
+    filesystem.write(`${filename}.json`, data);
   },
 };
 
