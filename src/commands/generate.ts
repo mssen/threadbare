@@ -75,6 +75,15 @@ const command: GluegunCommand = {
       (parameters.options['lang'] as string) ||
       (parameters.options['l'] as string) ||
       'en';
+    const type =
+      (parameters.options['type'] as string) ||
+      (parameters.options['t'] as string) ||
+      'pages';
+
+    if (type !== 'pages' && type !== 'scroll') {
+      print.error('Type must be either pages or scroll.');
+      return;
+    }
 
     const tweetName = path.basename(filepath, '.json');
 
@@ -94,13 +103,29 @@ const command: GluegunCommand = {
     try {
       thread.forEach(parseText);
 
-      await generate({
-        template: 'scroll.ejs',
-        target: `${tweetName}/index.html`,
-        props: { thread, lang },
-      });
+      if (type === 'scroll') {
+        await generate({
+          template: 'scroll.ejs',
+          target: `${tweetName}/index.html`,
+          props: { lang, thread },
+        });
 
-      spinner.succeed(`Generated file at ${tweetName}/index.html`);
+        spinner.succeed(`Generated file at ${tweetName}/index.html`);
+      } else {
+        const totalPages = thread.length;
+        await Promise.all(
+          thread.map(async (tweet, index) => {
+            const pageNumber = index + 1;
+            await generate({
+              template: 'pages.ejs',
+              target: `${tweetName}/${pageNumber}.html`,
+              props: { lang, pageNumber, tweet, totalPages },
+            });
+          })
+        );
+
+        spinner.succeed(`Generated files at ${tweetName}/`);
+      }
     } catch (error) {
       spinner.fail('Something went wrong.');
       throw error;
