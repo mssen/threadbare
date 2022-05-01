@@ -8,7 +8,7 @@ interface TweetReference {
 export interface Media {
   media_key: string;
   type: 'animated_gif' | 'photo' | 'video';
-  url: string;
+  url?: string;
 }
 
 export interface UrlEntity {

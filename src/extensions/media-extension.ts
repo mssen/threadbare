@@ -2,7 +2,10 @@ import path from 'path';
 import type { GluegunToolbox } from 'gluegun';
 import { Stream } from 'node:stream';
 
-type DownloadMedia = (url: string, downloadFolder: string) => Promise<void>;
+type DownloadMedia = (
+  url: string | undefined,
+  downloadFolder: string
+) => Promise<string>;
 
 export interface Media {
   downloadMedia: DownloadMedia;
@@ -17,6 +20,8 @@ const extension = (toolbox: GluegunToolbox): void => {
   });
 
   const downloadMedia: DownloadMedia = async (url, downloadFolder) => {
+    if (!url) return '';
+
     const fileName = path.basename(url);
     const localFilePath = path.resolve(__dirname, downloadFolder, fileName);
     const response = await downloader.get<Stream>(
@@ -25,14 +30,15 @@ const extension = (toolbox: GluegunToolbox): void => {
       { responseType: 'stream' }
     );
 
-    response.data?.pipe(filesystem.createWriteStream(localFilePath));
+    const writer = filesystem.createWriteStream(localFilePath);
+    response.data?.pipe(writer);
 
     return new Promise((resolve, reject) => {
-      response.data?.on('end', () => {
-        resolve();
+      writer.on('end', () => {
+        resolve(localFilePath);
       });
 
-      response.data?.on('error', () => {
+      writer.on('error', () => {
         reject();
       });
     });

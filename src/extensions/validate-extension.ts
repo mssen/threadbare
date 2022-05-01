@@ -3,7 +3,7 @@ import { z, ZodError } from 'zod';
 
 const mediaSchema = z.object({
   type: z.enum(['animated_gif', 'photo', 'video']),
-  url: z.string().url(),
+  url: z.string().url().optional(),
 });
 
 const urlSchema = z.object({

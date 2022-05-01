@@ -2,8 +2,9 @@ import sortBy from 'lodash/fp/sortBy';
 import path from 'path';
 import type { GluegunCommand, GluegunToolbox } from 'gluegun';
 import type { ParsedThread, Validate } from '../extensions/validate-extension';
+import type { Media } from '../extensions/media-extension';
 
-export function parseText(tweet: ParsedThread[number]) {
+function parseText(tweet: ParsedThread[number]) {
   const urlParts =
     tweet.entities?.urls?.map(({ start, end, expanded_url, display_url }) => {
       return {
@@ -54,6 +55,24 @@ export function parseText(tweet: ParsedThread[number]) {
   );
 }
 
+async function saveMedia(
+  tweet: ParsedThread[number],
+  folder: string,
+  downloadMedia: Media['downloadMedia']
+) {
+  if (!tweet.media) return;
+  const results = await Promise.allSettled(
+    tweet.media.map((media) => downloadMedia(media.url, folder))
+  );
+  results.forEach((result, index) => {
+    if (result.status === 'fulfilled') {
+      // Don't know why this is yelling, it's checked above...
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      tweet.media![index].url = result.value;
+    }
+  });
+}
+
 const command: GluegunCommand = {
   name: 'generate',
   alias: ['g'],
@@ -66,9 +85,11 @@ const command: GluegunCommand = {
       template: { generate },
       print,
       validate: untypedValidate,
+      media: untypedMedia,
     } = toolbox;
 
     const validate = untypedValidate as Validate;
+    const media = untypedMedia as Media;
 
     const filepath = parameters.first || '';
     const lang =
@@ -102,6 +123,9 @@ const command: GluegunCommand = {
 
     try {
       thread.forEach(parseText);
+      await Promise.all(
+        thread.map((tweet) => saveMedia(tweet, tweetName, media.downloadMedia))
+      );
 
       if (type === 'scroll') {
         await generate({
