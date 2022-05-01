@@ -4,7 +4,9 @@
   </head>
   <body>
     <main>
-      <% props.thread.forEach(tweet => { %> <%- tweet.text %> <% }) %>
+      <% props.thread.forEach(tweet => { %>
+        <%- include('tweet', { tweet }) %> 
+      <% }) %>
     </main>
   </body>
 </html>

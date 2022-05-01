@@ -4,7 +4,7 @@
   </head>
   <body>
     <main>
-      <%- props.tweet.text %>
+      <%- include('tweet', { tweet }) %> 
     </main>
     <footer class="pagination">
       <% if (props.pageNumber !== 1) { %>
