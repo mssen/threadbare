@@ -1,10 +1,11 @@
 <html lang="<%= props.lang %>">
   <head>
     <title>Twitter Thread Page <%= props.pageNumber %></title>
+    <%- include('partial/style') %>
   </head>
   <body>
     <main>
-      <%- include('tweet', { tweet }) %> 
+      <%- include('partial/tweet', { tweet: props.tweet }) %> 
     </main>
     <footer class="pagination">
       <% if (props.pageNumber !== 1) { %>

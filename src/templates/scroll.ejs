@@ -1,11 +1,12 @@
 <html lang="<%= props.lang %>">
   <head>
     <title>Twitter Thread</title>
+    <%- include('partial/style') %>
   </head>
   <body>
     <main>
-      <% props.thread.forEach(tweet => { %>
-        <%- include('tweet', { tweet }) %> 
+      <% props.thread.forEach((tweet, index) => { %>
+        <%- include('partial/tweet', { tweet }) %> 
       <% }) %>
     </main>
   </body>

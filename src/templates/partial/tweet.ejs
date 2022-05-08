@@ -1,0 +1,10 @@
+<article>
+  <%- tweet.text %>
+  <div class="gallery">
+  <% tweet.media?.forEach(media => { %>
+    <% if (media.type === 'photo') { %>
+      <img src="<%= media.url %>" alt="Image" />
+    <% } %>
+  <% }) %>
+  </div>
+</article>
