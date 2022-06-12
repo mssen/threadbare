@@ -4,26 +4,28 @@
     <%- include('partial/style') %>
   </head>
   <body>
-    <main>
-      <%- include('partial/tweet', { tweet: props.tweet }) %> 
-    </main>
-    <footer class="pagination">
-      <% if (props.pageNumber !== 1) { %>
-       <a href="<%= props.pageNumber - 1 %>.html">Previous</a>
-      <% } %>
-      <% if (props.pageNumber !== props.totalPages) { %>
-        <a href="<%= props.pageNumber + 1 %>.html">Next</a>
-      <% } %>
-
-      <% for( let index = 1; index <= props.totalPages; index++ ) { %>
-        <a
-        <% if (index === props.pageNumber) { %>
-          aria-current="page" class="active"
+    <div class="container">
+      <main>
+        <%- include('partial/tweet', { tweet: props.tweet }) %> 
+      </main>
+      <footer class="pagination">
+        <% if (props.pageNumber !== 1) { %>
+        <a href="<%= props.pageNumber - 1 %>.html">Previous</a>
         <% } %>
-        href="<%= index %>.html">
-        <%= index %> 
-      </a>
-      <% } %>
-    </footer>
+        <% if (props.pageNumber !== props.totalPages) { %>
+          <a href="<%= props.pageNumber + 1 %>.html">Next</a>
+        <% } %>
+
+        <% for( let index = 1; index <= props.totalPages; index++ ) { %>
+          <a
+          <% if (index === props.pageNumber) { %>
+            aria-current="page" class="active"
+          <% } %>
+          href="<%= index %>.html">
+          <%= index %> 
+        </a>
+        <% } %>
+      </footer>
+    </div>
   </body>
 </html>

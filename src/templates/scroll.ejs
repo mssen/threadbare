@@ -4,10 +4,12 @@
     <%- include('partial/style') %>
   </head>
   <body>
-    <main>
-      <% props.thread.forEach((tweet, index) => { %>
-        <%- include('partial/tweet', { tweet }) %> 
-      <% }) %>
-    </main>
+    <div class="container">
+      <main>
+        <% props.thread.forEach((tweet, index) => { %>
+          <%- include('partial/tweet', { tweet }) %> 
+        <% }) %>
+      </main>
+    </div>
   </body>
 </html>
