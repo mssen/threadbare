@@ -84,6 +84,7 @@ const command: GluegunCommand = {
       filesystem,
       template: { generate },
       print,
+      plugin,
       validate: untypedValidate,
       media: untypedMedia,
     } = toolbox;
@@ -147,6 +148,21 @@ const command: GluegunCommand = {
             });
           })
         );
+
+        const baseDirectory = plugin?.directory;
+        if (!baseDirectory) {
+          throw new Error('Could not find copy over styles.');
+        }
+
+        let pathToStyles = `${baseDirectory}/templates/style.css`;
+
+        if (!filesystem.isFile(pathToStyles)) {
+          pathToStyles = `${baseDirectory}/build/templates/style.css`;
+        }
+
+        filesystem.copy(pathToStyles, `${tweetName}/style.css`, {
+          overwrite: true,
+        });
 
         spinner.succeed(`Generated files at ${tweetName}/`);
       }
