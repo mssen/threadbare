@@ -16,5 +16,5 @@ module.exports = {
   env: {
     node: true,
   },
-  ignorePatterns: ['commitlint.config.js', 'build'],
+  ignorePatterns: ['commitlint.config.js', 'build', 'src/templates/gallery'],
 };
